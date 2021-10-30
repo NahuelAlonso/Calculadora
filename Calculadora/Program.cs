@@ -1,24 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
+using System.Threading;
 
 
 namespace ConsoleApp1
 {
     class Program
     {
+
         static string[] signs = { "+", "-", "*", "/", "^", "ln", "sin", "cos", "log" };
         static void Main()
         {
-            float output;
+            float output = -1;
             string function;
             function = Console.ReadLine();
+
             while (function != "")
             {
                 output = SolveParenthesis(function);
+                Console.WriteLine(output);
                 function = Console.ReadLine();
             }
             //output tiene la respuesta
+        }
+        static float SolveParenthesis(string function)//Tiene que tener número igual de paréntesis abiertos que cerrados.
+        {
+            
+            int aux;
+            List<int> OParenthesis = new List<int>(), CParenthesis = new List<int>();
+            string subFunction;
+
+            function = function.Replace('.', ',');
+            function = function.Replace(" ", "");
+            function = function.Replace(':', '/');
+            function = function.Replace("E+", "*10^");
+            function = function.Replace("E", "*10^");
+            for (int j = 0; j < function.Length; j++)
+                if (function[j] == '(')
+                    OParenthesis.Add(j);
+                else
+                    if (function[j] == ')')
+                    CParenthesis.Add(j);
+            if (OParenthesis.Count != CParenthesis.Count)
+                return 0;
+            while (OParenthesis.Count != 0)
+            {
+                subFunction = "";
+                aux = OParenthesis.Count - 1;
+                while (OParenthesis[aux] > CParenthesis[0])
+                    aux--;
+                for (int j = OParenthesis[aux] + 1; j < CParenthesis[0]; j++)
+                    subFunction += function[j];
+                function = function.Replace('(' + subFunction + ')', SolveFunction(subFunction).ToString());
+                OParenthesis.Clear();
+                CParenthesis.Clear();
+                for (int j = 0; j < function.Length; j++)
+                    if (function[j] == '(')
+                        OParenthesis.Add(j);
+                    else
+                        if (function[j] == ')')
+                        CParenthesis.Add(j);
+            }
+            return SolveFunction(function);
         }
         static float SolveFunction(string function)
         {
@@ -61,9 +106,7 @@ namespace ConsoleApp1
                             lastModified = i;
                         }
                         break;
-
                 }
-
             }
             for (i = 0; i < terms.Length; i++)
                 for (int j = 0; j < terms[i].Count; j++)
@@ -157,45 +200,7 @@ namespace ConsoleApp1
             }//Se resuelven los terms
             return buffer;
         }
-        static float SolveParenthesis(string function)//Tiene que tener número igual de paréntesis abiertos que cerrados.
-        {
-            int aux;
-            List<int> OParenthesis = new List<int>(), CParenthesis = new List<int>();
-            string subFunction;
-
-            function = function.Replace('.', ',');
-            function = function.Replace(" ", "");
-            function = function.Replace(':', '/');
-            function = function.Replace("E+", "*10^");
-            function = function.Replace("E", "*10^");
-            for (int j = 0; j < function.Length; j++)
-                if (function[j] == '(')
-                    OParenthesis.Add(j);
-                else
-                    if (function[j] == ')')
-                    CParenthesis.Add(j);
-            if (OParenthesis.Count != CParenthesis.Count)
-                return 0;
-            while (OParenthesis.Count != 0)
-            {
-                subFunction = "";
-                aux = OParenthesis.Count - 1;
-                while (OParenthesis[aux] > CParenthesis[0])
-                    aux--;
-                for (int j = OParenthesis[aux] + 1; j < CParenthesis[0]; j++)
-                    subFunction += function[j];
-                function = function.Replace('(' + subFunction + ')', SolveFunction(subFunction).ToString());
-                OParenthesis.Clear();
-                CParenthesis.Clear();
-                for (int j = 0; j < function.Length; j++)
-                    if (function[j] == '(')
-                        OParenthesis.Add(j);
-                    else
-                        if (function[j] == ')')
-                        CParenthesis.Add(j);
-            }
-            return SolveFunction(function);
-        }
+        
         static public string ReplaceFirst(string text, string search, string replace)
         {
             int pos = text.IndexOf(search);
